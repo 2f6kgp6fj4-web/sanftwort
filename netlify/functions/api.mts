@@ -8,7 +8,8 @@ import {
   accessFromSession,
   buildUserPrompt,
   isAccessActive,
-  parseModelJson,
+  normalizeResult,
+  RESULT_TOOL,
   sha256,
   validateInput,
   verifyStripeSignature,
@@ -61,16 +62,18 @@ async function translate(req: Request, context: Context) {
   for (let attempt = 0; attempt < 2; attempt++) {
     const msg = await client.messages.create({
       model: MODEL,
-      max_tokens: 1400,
+      max_tokens: 2500,
       system: SYSTEM_PROMPT,
+      tools: [RESULT_TOOL as any],
+      tool_choice: { type: "tool", name: "antwort" },
       messages: [{ role: "user", content: buildUserPrompt(input) }],
     });
-    const text = msg.content.map((b: any) => (b.type === "text" ? b.text : "")).join("");
+    const block: any = msg.content.find((b: any) => b.type === "tool_use");
     try {
-      result = parseModelJson(text);
+      result = normalizeResult(block?.input);
       break;
     } catch (e) {
-      console.error("parse failed", e, text.slice(0, 300));
+      console.error("parse failed", e, msg.stop_reason, JSON.stringify(block?.input || msg.content).slice(0, 300));
     }
   }
   if (!result) return json({ error: "Das hat nicht geklappt. Bitte nochmal versuchen." }, 502);
