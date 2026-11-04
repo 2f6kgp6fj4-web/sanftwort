@@ -1,0 +1,13 @@
+{
+  "name": "sanftwort",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node test.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.5.0",
+    "@netlify/blobs": "^11.1.7",
+    "@netlify/functions": "^6.1.0"
+  }
+}

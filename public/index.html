@@ -1,0 +1,341 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sanftwort – Sag, was dich wütend macht. Ohne zu verletzen.</title>
+<meta name="description" content="Schreib rein, was dich am Partner, an der Ex oder an der Familie gerade aufregt. Sanftwort macht daraus eine Nachricht, die ankommt statt eskaliert. 3× pro Woche gratis.">
+<meta property="og:title" content="Sanftwort – Wut rein, faire Worte raus">
+<meta property="og:description" content="Meine Nachricht: 88°. Nach Sanftwort: 16°. Probier es mit dem Text, den du fast abgeschickt hättest.">
+<meta name="theme-color" content="#1f2430">
+<link rel="icon" href="/icon.svg" type="image/svg+xml">
+<style>
+:root{--bg:#faf7f2;--card:#fff;--ink:#1f2430;--muted:#5d6472;--line:#e7e1d8;--hot:#e4572e;--warm:#f2a541;--cool:#2fa58c;--cool-bg:#e6f5f1;--accent:#1f2430;--accent-ink:#fff;--shadow:0 1px 2px rgba(31,36,48,.06),0 8px 24px rgba(31,36,48,.06)}
+@media (prefers-color-scheme:dark){:root{--bg:#14161c;--card:#1d2028;--ink:#eef0f4;--muted:#a3a9b6;--line:#2c303a;--cool-bg:#173029;--accent:#eef0f4;--accent-ink:#14161c;--shadow:none}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased}
+a{color:inherit}
+.wrap{max-width:720px;margin:0 auto;padding:0 16px}
+header{display:flex;align-items:center;justify-content:space-between;padding:14px 0}
+.logo{font-weight:800;letter-spacing:-.02em;font-size:20px;text-decoration:none;display:flex;align-items:center;gap:8px}
+.logo i{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--hot),var(--cool));display:inline-block}
+.pill{font-size:13px;padding:5px 10px;border-radius:99px;border:1px solid var(--line);color:var(--muted);background:var(--card);cursor:pointer}
+.pill.pro{border-color:var(--cool);color:var(--cool)}
+h1{font-size:clamp(28px,6vw,42px);line-height:1.12;letter-spacing:-.025em;margin:18px 0 10px}
+h1 em{font-style:normal;color:var(--cool)}
+.lead{color:var(--muted);margin:0 0 20px;font-size:17px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:var(--shadow)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.chip{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:99px;padding:7px 12px;font-size:14px;cursor:pointer}
+.chip[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+textarea{width:100%;min-height:130px;resize:vertical;border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit;background:var(--bg);color:var(--ink)}
+textarea:focus{outline:2px solid var(--cool);outline-offset:1px}
+.meter{display:flex;align-items:center;gap:10px;margin:10px 0 4px;font-size:14px;color:var(--muted)}
+.bar{flex:1;height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar b{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--cool),var(--warm),var(--hot));transition:width .3s}
+.deg{font-variant-numeric:tabular-nums;font-weight:700;min-width:44px;text-align:right}
+details{margin:10px 0 0;font-size:15px}
+summary{cursor:pointer;color:var(--muted)}
+details label{display:block;font-size:14px;color:var(--muted);margin:12px 0 6px}
+details textarea{min-height:70px}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.btn{appearance:none;border:0;border-radius:12px;padding:14px 18px;font-family:inherit;font-weight:600;font-size:16px;line-height:1;cursor:pointer;background:var(--accent);color:var(--accent-ink);display:inline-flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+.btn.full{width:100%;margin-top:14px}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);padding:10px 14px;font-size:14px}
+.btn[disabled]{opacity:.55;cursor:wait}
+.hint{font-size:13px;color:var(--muted);margin-top:8px;text-align:center}
+#result{margin-top:18px;display:none}
+.heat{display:flex;align-items:baseline;justify-content:center;gap:14px;font-weight:800;font-size:40px;letter-spacing:-.02em;margin:4px 0 14px}
+.heat .from{color:var(--hot)}.heat .to{color:var(--cool)}.heat small{font-size:15px;color:var(--muted);font-weight:500}
+.klar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.klar div{background:var(--bg);border-radius:12px;padding:10px;font-size:14px}
+.klar span{display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+@media (max-width:520px){.klar{grid-template-columns:1fr}}
+.ver{border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
+.ver h3{margin:0 0 6px;font-size:13px;color:var(--cool);text-transform:uppercase;letter-spacing:.05em}
+.ver p{margin:0 0 10px;white-space:pre-wrap}
+.ver[contenteditable]:focus{outline:2px solid var(--cool)}
+.note{background:var(--cool-bg);border-radius:12px;padding:12px 14px;font-size:15px;margin-top:10px}
+.note b{display:block;font-size:13px;margin-bottom:2px}
+.safety{border:2px solid var(--hot);border-radius:14px;padding:16px;white-space:pre-wrap}
+section{margin:44px 0}
+h2{font-size:24px;letter-spacing:-.02em;margin:0 0 14px}
+.steps{display:grid;gap:10px}
+.steps div{display:flex;gap:12px;align-items:flex-start}
+.steps b{flex:none;width:28px;height:28px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-size:14px}
+.ex{display:grid;gap:10px}
+.ex .a{color:var(--hot)}.ex .b{color:var(--cool)}
+.plans{display:grid;gap:10px;grid-template-columns:repeat(3,1fr)}
+@media (max-width:620px){.plans{grid-template-columns:1fr}}
+.plan{border:1px solid var(--line);border-radius:16px;padding:16px;background:var(--card);display:flex;flex-direction:column;gap:6px;position:relative}
+.plan.hl{border:2px solid var(--cool)}
+.plan .tag{position:absolute;top:-11px;left:14px;background:var(--cool);color:#fff;font-size:12px;font-weight:700;border-radius:99px;padding:2px 9px}
+.plan .p{font-size:28px;font-weight:800;letter-spacing:-.02em}
+.plan small{color:var(--muted)}
+.plan .btn{margin-top:auto}
+.faq details{border-bottom:1px solid var(--line);padding:12px 0;margin:0}
+.faq summary{color:var(--ink);font-weight:600}
+.faq p{color:var(--muted);margin:8px 0 0}
+footer{border-top:1px solid var(--line);padding:22px 0 40px;font-size:14px;color:var(--muted)}
+footer a{margin-right:14px;display:inline-block;margin-bottom:6px}
+dialog{border:0;border-radius:20px;padding:22px;max-width:520px;width:calc(100% - 32px);background:var(--bg);color:var(--ink)}
+dialog::backdrop{background:rgba(10,12,18,.55)}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--accent);color:var(--accent-ink);padding:10px 16px;border-radius:99px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:9}
+.toast.on{opacity:1}
+.banner{background:var(--cool-bg);border:1px solid var(--cool);border-radius:14px;padding:14px;margin:8px 0 16px;font-size:15px}
+.banner code{font-size:12px;word-break:break-all;background:var(--card);padding:2px 6px;border-radius:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <a class="logo" href="/"><i></i>Sanftwort</a>
+  <button class="pill" id="statusPill" type="button">3 gratis</button>
+</header>
+
+<div id="banner"></div>
+
+<h1>Sag, was dich wütend macht. <em>Ohne zu verletzen.</em></h1>
+<p class="lead">Schreib rein, was du gerade wirklich denkst – über deinen Partner, deine Ex, die Schwiegermutter. Du bekommst eine Nachricht zurück, die ankommt statt eskaliert.</p>
+
+<div class="card" id="tool">
+  <div class="chips" id="recipients" role="group" aria-label="An wen?">
+    <button class="chip" data-r="partner" aria-pressed="true" type="button">Partner/in</button>
+    <button class="chip" data-r="ex" aria-pressed="false" type="button">Ex / Co-Eltern</button>
+    <button class="chip" data-r="familie" aria-pressed="false" type="button">Familie</button>
+    <button class="chip" data-r="freund" aria-pressed="false" type="button">Freund/in</button>
+    <button class="chip" data-r="kollege" aria-pressed="false" type="button">Job</button>
+  </div>
+  <textarea id="text" maxlength="2000" placeholder="z. B.: Du hast SCHON WIEDER vergessen, die Kita-Anmeldung abzuschicken. Ich muss mich echt um alles allein kümmern!"></textarea>
+  <div class="meter" aria-live="polite"><span>Hitze</span><div class="bar"><b id="barFill"></b></div><span class="deg" id="deg">0°</span></div>
+  <details>
+    <summary>Feinabstimmung (optional)</summary>
+    <div class="chips" style="margin-top:12px" id="channels">
+      <button class="chip" data-c="nachricht" aria-pressed="true" type="button">Als Nachricht</button>
+      <button class="chip" data-c="gespraech" aria-pressed="false" type="button">Persönlich sagen</button>
+    </div>
+    <label for="style">So schreibe ich sonst (2–3 eigene Nachrichten) – damit es nach dir klingt</label>
+    <textarea id="style" maxlength="600" placeholder="hey, bin gleich da 😅 holst du noch milch?"></textarea>
+    <label for="profile">So möchte mein Gegenüber Kritik hören (kann er/sie selbst ausfüllen)</label>
+    <textarea id="profile" maxlength="600" placeholder="Bitte direkt, aber nicht vor anderen. Kein „immer“. Lieber ein konkreter Vorschlag."></textarea>
+    <div class="row" style="margin-top:8px"><button class="btn ghost" id="inviteBtn" type="button">Gegenüber Profil ausfüllen lassen</button></div>
+  </details>
+  <button class="btn full" id="go" type="button">Sanft übersetzen</button>
+  <div class="hint" id="hint">3 Übersetzungen pro Woche gratis · ohne Anmeldung · Texte werden nicht gespeichert</div>
+</div>
+
+<div id="result" class="card" aria-live="polite"></div>
+
+<section>
+  <h2>So funktioniert's</h2>
+  <div class="steps">
+    <div><b>1</b><span><strong>Ungefiltert reinschreiben.</strong> Genau so, wie es dir gerade durch den Kopf geht. Niemand liest mit.</span></div>
+    <div><b>2</b><span><strong>Klarheit bekommen.</strong> Was du fühlst, was du brauchst und worum du eigentlich bittest – plus wie es deinem Gegenüber gehen könnte.</span></div>
+    <div><b>3</b><span><strong>Fertige Nachricht schicken.</strong> Drei Versionen, alle bearbeitbar. Kopieren oder direkt per WhatsApp senden.</span></div>
+  </div>
+</section>
+
+<section>
+  <h2>Vorher, nachher</h2>
+  <div class="ex">
+    <div class="card"><div class="a"><strong>91°</strong> „Deine Mutter kommt Weihnachten NICHT schon am 23. Ich hab keinen Bock, wieder drei Tage Kommentare über unsere Erziehung zu hören.“</div></div>
+    <div class="card"><div class="b"><strong>14°</strong> „Ich merke, dass mir vor Weihnachten graut, wenn deine Mutter drei Tage bleibt – die Kommentare zur Erziehung hängen mir lange nach. Können wir überlegen, ob sie erst am 24. kommt? Und mich unterstützen, wenn es wieder losgeht?“</div></div>
+  </div>
+</section>
+
+<section id="preise">
+  <h2>Preise</h2>
+  <div class="plans" id="plans"></div>
+  <p class="hint">Preise inkl. MwSt. · Abos jederzeit mit einem Klick kündbar · <a href="/kuendigen.html">Vertrag kündigen</a></p>
+</section>
+
+<section class="faq">
+  <h2>Fragen</h2>
+  <details><summary>Ist das Therapie oder Beratung?</summary><p>Nein. Sanftwort ist ein Schreibwerkzeug, das bewährte Gesprächsregeln aus der Kommunikationsforschung anwendet (Gewaltfreie Kommunikation, Paarforschung nach Gottman). Bei ernsten Krisen ersetzt es keine Paarberatung oder Therapie.</p></details>
+  <details><summary>Werden meine Texte gespeichert?</summary><p>Nein. Dein Text wird nur zum Umformulieren an das KI-Modell geschickt und danach nicht gespeichert. Es gibt kein Konto und keine Werbe-Cookies.</p></details>
+  <details><summary>Klingt das dann nicht nach KI?</summary><p>Sanftwort vermeidet Therapie-Sprech und bleibt nah an deinen Worten. Mit einer kurzen Stil-Probe unter „Feinabstimmung“ klingt es noch mehr nach dir. Jede Version kannst du vor dem Senden selbst ändern.</p></details>
+  <details><summary>Muss mein Partner auch etwas installieren?</summary><p>Nein. Dein Gegenüber bekommt eine ganz normale Nachricht. Wenn ihr wollt, kann er oder sie ein kurzes Profil ausfüllen, wie Kritik am besten ankommt.</p></details>
+  <details><summary>Wie bekomme ich meinen Zugang auf ein anderes Gerät?</summary><p>Nach dem Kauf zeigen wir dir einen Zugangslink. Öffne ihn auf dem anderen Gerät – fertig. Oder <a href="#" id="restoreLink">Zugangscode hier eingeben</a>.</p></details>
+</section>
+
+<footer>
+  <a href="/impressum.html">Impressum</a><a href="/datenschutz.html">Datenschutz</a><a href="/agb.html">AGB &amp; Widerruf</a><a href="/kuendigen.html">Verträge hier kündigen</a>
+  <div>Bei Gewalt in der Beziehung: Hilfetelefon 116 016 (für Frauen) · 0800 1239900 (für Männer). In Krisen: TelefonSeelsorge 0800 111 0 111.</div>
+</footer>
+</div>
+
+<dialog id="paywall">
+  <h2 style="margin-top:0">Deine 3 Gratis-Übersetzungen sind aufgebraucht</h2>
+  <p style="color:var(--muted);margin-top:0">Nächste Woche gibt's wieder 3 gratis. Oder sofort weiter:</p>
+  <div class="plans" id="plansModal" style="grid-template-columns:1fr"></div>
+  <button class="btn ghost full" type="button" onclick="document.getElementById('paywall').close()">Später</button>
+</dialog>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const LINKS = {
+  week: "https://buy.stripe.com/test_dRm9AU4qR2q02QxcYU8N202",
+  month: "https://buy.stripe.com/test_cNi6oI1eF3u4dvbe2Y8N200",
+  year: "https://buy.stripe.com/test_14A8wQcXn2q01Mt3ok8N201?prefilled_promo_code=GRUENDER",
+  holiday: "https://buy.stripe.com/test_9B600ke1r4y82Qxe2Y8N203",
+};
+const PORTAL = "https://billing.stripe.com/p/login/test_cNi6oI1eF3u4dvbe2Y8N200";
+const $ = (s) => document.querySelector(s);
+const store = { get: (k) => { try { return localStorage.getItem(k) } catch { return null } }, set: (k, v) => { try { localStorage.setItem(k, v) } catch {} } };
+const state = { recipient: "partner", channel: "nachricht", token: store.get("sw_token"), last: null };
+
+function toast(t) { const el = $("#toast"); el.textContent = t; el.classList.add("on"); setTimeout(() => el.classList.remove("on"), 1800); }
+function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+function api(path, opts = {}) {
+  return fetch("/api/" + path, { ...opts, headers: { "content-type": "application/json", ...(state.token ? { "x-sw-token": state.token } : {}) } });
+}
+
+// --- Pläne ---
+function planHtml() {
+  const holiday = new Date() >= new Date(new Date().getFullYear(), 10, 25) && new Date().getMonth() <= 11;
+  const plans = [
+    { k: "week", t: "Wochenpass", p: "2,99 €", s: "7 Tage unbegrenzt · kein Abo", b: "Für den Streit von heute" },
+    ...(holiday ? [{ k: "holiday", t: "Feiertags-Pass", p: "3,99 €", s: "14 Tage unbegrenzt · kein Abo", b: "Ohne Streit durch die Feiertage" }] : []),
+    { k: "year", t: "Plus Jahr", p: "17,50 €", s: "<s>34,99 €</s> erstes Jahr mit Code GRUENDER · nur für die ersten 100", b: "Unbegrenzt, das ganze Jahr", hl: true },
+    { k: "month", t: "Plus Monat", p: "4,99 €", s: "pro Monat · monatlich kündbar", b: "Unbegrenzt übersetzen" },
+  ];
+  return plans.map((x) => `<div class="plan${x.hl ? " hl" : ""}">${x.hl ? '<span class="tag">Gründerpreis −50 %</span>' : ""}<strong>${x.t}</strong><span class="p">${x.p}</span><small>${x.s}</small><small>${x.b}</small><a class="btn" href="${LINKS[x.k]}" rel="noopener">Auswählen</a></div>`).join("");
+}
+$("#plans").innerHTML = planHtml();
+$("#plansModal").innerHTML = planHtml();
+
+// --- Auswahl ---
+function chipGroup(sel, attr, key) {
+  $(sel).addEventListener("click", (e) => {
+    const b = e.target.closest("[data-" + attr + "]"); if (!b) return;
+    $(sel).querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-pressed", c === b));
+    state[key] = b.dataset[attr];
+  });
+}
+chipGroup("#recipients", "r", "recipient");
+chipGroup("#channels", "c", "channel");
+
+// --- Hitzemeter (Schätzung beim Tippen) ---
+const HOT = /\b(immer|nie|niemals|jedes mal|schon wieder|typisch|du bist|egal|interessiert dich|nervt|nervst|scheiße|scheiss|kotzt|idiot|arsch|peinlich|faul|lächerlich|unfähig|hau ab|verpiss|hasse|bescheuert|dumm|selbst schuld|kein bock|null bock|wie immer|kapierst|checkst|sowieso)\b/gi;
+function estimate(t) {
+  if (!t.trim()) return 0;
+  const letters = t.replace(/[^A-Za-zÄÖÜäöüß]/g, "");
+  const caps = letters.length ? (letters.replace(/[^A-ZÄÖÜ]/g, "").length / letters.length) : 0;
+  const ex = (t.match(/!/g) || []).length;
+  const hits = (t.match(HOT) || []).length;
+  return Math.min(99, Math.round(12 + caps * 70 + Math.min(ex, 5) * 5 + hits * 13 + ((t.match(/\?!|!\?/g) || []).length * 6)));
+}
+function setMeter(v) { $("#barFill").style.width = v + "%"; $("#deg").textContent = v + "°"; }
+$("#text").addEventListener("input", (e) => setMeter(estimate(e.target.value)));
+
+// --- Profil-Einladung ---
+$("#inviteBtn").addEventListener("click", async () => {
+  const msg = "Kleine Bitte: Wie möchtest du Kritik oder schwierige Themen von mir am liebsten hören? Ein, zwei Sätze reichen (z. B. direkt, nicht vor anderen, lieber mit Vorschlag). Ich nutze das, damit ich fairer schreibe – über sanftwort: " + location.origin;
+  if (navigator.share) { try { await navigator.share({ text: msg }); return } catch {} }
+  location.href = "https://wa.me/?text=" + encodeURIComponent(msg);
+});
+
+// --- Status ---
+async function refreshStatus() {
+  try {
+    const r = await (await api("status")).json();
+    const pill = $("#statusPill");
+    if (r.pro) {
+      pill.classList.add("pro");
+      pill.textContent = r.until ? "Pass aktiv bis " + new Date(r.until).toLocaleDateString("de-DE") : "Plus aktiv";
+      $("#hint").textContent = "Unbegrenzt übersetzen · Texte werden nicht gespeichert";
+    } else {
+      pill.classList.remove("pro");
+      pill.textContent = r.left + " von " + r.free + " gratis";
+      $("#hint").textContent = r.left + " von " + r.free + " Gratis-Übersetzungen diese Woche · ohne Anmeldung · Texte werden nicht gespeichert";
+    }
+  } catch {}
+}
+$("#statusPill").addEventListener("click", () => {
+  if ($("#statusPill").classList.contains("pro")) {
+    if (confirm("Abo verwalten oder kündigen?")) location.href = PORTAL;
+  } else location.hash = "#preise";
+});
+
+// --- Übersetzen ---
+async function translate(morelikeme = false) {
+  const text = $("#text").value.trim();
+  if (text.length < 3) { $("#text").focus(); toast("Schreib erst, was dich beschäftigt."); return; }
+  const btn = $("#go"); btn.disabled = true; btn.textContent = "Kühle runter …";
+  try {
+    const res = await api("translate", { method: "POST", body: JSON.stringify({ text, recipient: state.recipient, channel: state.channel, style: $("#style").value, profile: $("#profile").value, morelikeme }) });
+    const data = await res.json().catch(() => ({}));
+    if (res.status === 402) { $("#paywall").showModal(); return; }
+    if (!res.ok) { toast(data.error || "Das hat nicht geklappt."); return; }
+    state.last = data; render(data);
+    refreshStatus();
+  } catch { toast("Keine Verbindung. Bitte nochmal versuchen."); }
+  finally { btn.disabled = false; btn.textContent = "Sanft übersetzen"; }
+}
+$("#go").addEventListener("click", () => translate(false));
+
+function render(d) {
+  const el = $("#result"); el.style.display = "block";
+  if (d.safety) {
+    el.innerHTML = `<div class="safety">${esc(d.safety.message)}</div>`;
+    el.scrollIntoView({ behavior: "smooth", block: "start" }); return;
+  }
+  el.innerHTML = `
+    <div class="heat"><span class="from">${d.heat_before}°</span><small>→</small><span class="to">${d.heat_after}°</span></div>
+    <div class="klar"><div><span>Gefühl</span>${esc(d.gefuehl)}</div><div><span>Bedürfnis</span>${esc(d.beduerfnis)}</div><div><span>Bitte</span>${esc(d.bitte)}</div></div>
+    ${d.versions.map((v, i) => `<div class="ver"><h3>${esc(v.label)}</h3><p contenteditable="true" id="v${i}">${esc(v.text)}</p>
+      <div class="row"><button class="btn ghost" data-copy="${i}" type="button">Kopieren</button><button class="btn ghost" data-wa="${i}" type="button">Per WhatsApp</button></div></div>`).join("")}
+    <div class="row" style="margin:4px 0 6px"><button class="btn ghost" id="more" type="button">Klingt nicht nach mir – nochmal</button><button class="btn ghost" id="shareHeat" type="button">Mein ${d.heat_before}° → ${d.heat_after}° teilen</button></div>
+    ${d.gegenueber ? `<div class="note"><b>So könnte es deinem Gegenüber gehen</b>${esc(d.gegenueber)}</div>` : ""}
+    ${d.tipp ? `<div class="note"><b>Für das Gespräch danach</b>${esc(d.tipp)}</div>` : ""}
+    ${!d.pro && d.left === 0 ? `<div class="note"><b>Das war deine letzte Gratis-Übersetzung diese Woche.</b><a href="#preise">Wochenpass ab 2,99 € – ohne Abo</a></div>` : ""}`;
+  el.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+$("#result").addEventListener("click", async (e) => {
+  const c = e.target.closest("[data-copy]"), w = e.target.closest("[data-wa]");
+  if (c) { const t = $("#v" + c.dataset.copy).innerText; try { await navigator.clipboard.writeText(t); toast("Kopiert"); } catch { toast("Bitte markieren und kopieren"); } }
+  if (w) { location.href = "https://wa.me/?text=" + encodeURIComponent($("#v" + w.dataset.wa).innerText); }
+  if (e.target.id === "more") translate(true);
+  if (e.target.id === "shareHeat" && state.last) {
+    const msg = `Meine Nachricht hatte ${state.last.heat_before}°. Nach Sanftwort: ${state.last.heat_after}°. Probier's mit dem Text, den du fast abgeschickt hättest: ${location.origin}`;
+    if (navigator.share) { try { await navigator.share({ text: msg }); } catch {} } else { try { await navigator.clipboard.writeText(msg); toast("Text kopiert – jetzt teilen"); } catch {} }
+  }
+});
+
+// --- Nach dem Kauf / Zugang wiederherstellen ---
+function showAccess(token, info) {
+  const link = location.origin + "/?zugang=" + encodeURIComponent(token);
+  const what = info.until ? "Dein Pass gilt bis " + new Date(info.until).toLocaleDateString("de-DE") + "." : "Sanftwort Plus ist aktiv.";
+  $("#banner").innerHTML = `<div class="banner"><strong>Danke! ${what}</strong><br>Speichere diesen Zugangslink, um Sanftwort auf anderen Geräten zu nutzen:<br><code>${esc(link)}</code><div class="row" style="margin-top:8px"><button class="btn ghost" id="copyAccess" type="button">Link kopieren</button><a class="btn ghost" href="mailto:?subject=${encodeURIComponent("Mein Sanftwort-Zugang")}&body=${encodeURIComponent(link)}">An mich mailen</a></div></div>`;
+  $("#copyAccess").onclick = async () => { try { await navigator.clipboard.writeText(link); toast("Kopiert"); } catch {} };
+}
+async function activateFrom(token, showBanner) {
+  for (let i = 0; i < 20; i++) {
+    const r = await (await fetch("/api/activate?session_id=" + encodeURIComponent(token))).json().catch(() => ({}));
+    if (r.ready) {
+      state.token = token; store.set("sw_token", token);
+      if (showBanner) showAccess(token, r);
+      refreshStatus(); return true;
+    }
+    if (i === 0 && showBanner) $("#banner").innerHTML = `<div class="banner">Zahlung erhalten – dein Zugang wird freigeschaltet …</div>`;
+    await new Promise((res) => setTimeout(res, 1500));
+  }
+  $("#banner").innerHTML = `<div class="banner">Die Freischaltung dauert länger als erwartet. Lade die Seite in einer Minute neu. Falls es nicht klappt, schreib uns – die Kontaktdaten stehen im Impressum.</div>`;
+  return false;
+}
+(async () => {
+  const q = new URLSearchParams(location.search);
+  const sid = q.get("session_id") || q.get("zugang");
+  if (sid) { history.replaceState(null, "", "/"); await activateFrom(sid, true); }
+  refreshStatus();
+})();
+$("#restoreLink").addEventListener("click", (e) => {
+  e.preventDefault();
+  const code = (prompt("Zugangscode oder Zugangslink einfügen:") || "").trim();
+  const m = code.match(/cs_(test|live)_[A-Za-z0-9]+/);
+  if (m) activateFrom(m[0], true); else if (code) toast("Code nicht erkannt");
+});
+</script>
+</body>
+</html>

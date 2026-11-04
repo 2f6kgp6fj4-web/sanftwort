@@ -1,0 +1,40 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Vertrag kündigen – Sanftwort</title><link rel="stylesheet" href="/legal.css"><link rel="icon" href="/icon.svg"></head><body><main>
+<a class="back" href="/">← Sanftwort</a>
+<h1>Vertrag kündigen</h1>
+<p>Am schnellsten geht es im <a href="https://billing.stripe.com/p/login/test_cNi6oI1eF3u4dvbe2Y8N200" id="portal">Kundenportal</a>: E-Mail eingeben, Link bekommen, „Abo kündigen“. Oder nutze dieses Formular:</p>
+<form name="kuendigung" method="POST" data-netlify="true" netlify-honeypot="website" id="f">
+  <input type="hidden" name="form-name" value="kuendigung">
+  <p hidden><label>Nicht ausfüllen <input name="website"></label></p>
+  <label for="art">Art der Kündigung</label>
+  <select id="art" name="art" required><option>Ordentliche Kündigung</option><option>Außerordentliche Kündigung</option></select>
+  <label for="grund">Grund (nur bei außerordentlicher Kündigung)</label>
+  <input id="grund" name="grund">
+  <label for="name">Vor- und Nachname</label>
+  <input id="name" name="name" required autocomplete="name">
+  <label for="email">E-Mail-Adresse, mit der du gekauft hast</label>
+  <input id="email" name="email" type="email" required autocomplete="email">
+  <label for="vertrag">Welcher Vertrag?</label>
+  <select id="vertrag" name="vertrag" required><option>Sanftwort Plus Monat</option><option>Sanftwort Plus Jahr</option></select>
+  <label for="zeit">Kündigen zum</label>
+  <select id="zeit" name="zeitpunkt" required><option>Nächstmöglichen Zeitpunkt</option><option>Sofort (außerordentlich)</option></select>
+  <button type="submit">Jetzt kündigen</button>
+</form>
+<div id="ok" class="box" hidden></div>
+<p><small>Die Kündigungsbestätigung erhältst du zusätzlich per E-Mail. Speichere oder drucke die Bestätigung, die nach dem Absenden erscheint.</small></p>
+</main>
+<script>
+document.getElementById("f").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const f = e.target, data = new FormData(f), when = new Date().toLocaleString("de-DE");
+  data.append("eingang", when);
+  try {
+    const r = await fetch("/", { method: "POST", headers: { "Content-Type": "application/x-www-form-urlencoded" }, body: new URLSearchParams(data).toString() });
+    if (!r.ok) throw 0;
+    const ok = document.getElementById("ok");
+    ok.hidden = false; f.hidden = true;
+    const esc = (s) => String(s).replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" }[c]));
+    ok.innerHTML = `<strong>Deine Kündigung ist eingegangen.</strong><br>Eingang: ${esc(when)}<br>${esc(data.get("art"))} · ${esc(data.get("vertrag"))} · ${esc(data.get("zeitpunkt"))}<br>Name: ${esc(data.get("name"))} · E-Mail: ${esc(data.get("email"))}<br><br>Bitte speichere diese Seite (z. B. als Screenshot oder PDF). Eine Bestätigung kommt zusätzlich per E-Mail.<p><button type="button" onclick="print()">Bestätigung speichern / drucken</button></p>`;
+  } catch { alert("Das Absenden hat nicht geklappt. Bitte schreib uns eine E-Mail – die Adresse steht im Impressum."); }
+});
+</script>
+</body></html>
