@@ -4,6 +4,7 @@ import fs from "node:fs";
 import {
   verifyStripeSignature, accessFromSession, isAccessActive, weekKey,
   validateInput, buildUserPrompt, parseModelJson, SYSTEM_PROMPT,
+  normalizeEingang, SYSTEM_PROMPT_EINGANG, EINGANG_TOOL,
 } from "./lib/core.mjs";
 
 let n = 0;
@@ -59,6 +60,19 @@ t("Modellantwort parsen", () => {
   assert.throws(() => parseModelJson("kein json"));
   assert.throws(() => parseModelJson('{"versions":[]}'));
   assert.match(SYSTEM_PROMPT, /116 016/);
+});
+
+t("Eingangs-Modus", () => {
+  const i = validateInput({ text: "Du bist so egoistisch", mode: "eingang", recipient: "ex" });
+  assert.equal(i.mode, "eingang");
+  assert.match(buildUserPrompt(i), /habe ich bekommen/);
+  assert.equal(validateInput({ text: "abc", mode: "quatsch" }).mode, "senden");
+  const r = normalizeEingang({ safety: null, heat_before: 90, heat_after: 8, kern: "Termin", fragen: ["Wann?"], antwort_noetig: false, versions: [{ label: "BIFF", text: "Ok." }] });
+  assert.equal(r.mode, "eingang"); assert.equal(r.antwort_noetig, false); assert.deepEqual(r.fragen, ["Wann?"]);
+  assert.equal(normalizeEingang({ safety: { type: "bedrohung", message: "110" } }).safety.type, "bedrohung");
+  assert.throws(() => normalizeEingang({ safety: null, versions: [] }));
+  assert.match(SYSTEM_PROMPT_EINGANG, /BIFF/); assert.match(SYSTEM_PROMPT_EINGANG, /116 016/);
+  assert.equal(EINGANG_TOOL.name, "antwort");
 });
 
 t("Keine Platzhalter mehr in Rechtstexten", () => {

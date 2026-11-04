@@ -9,7 +9,10 @@ import {
   buildUserPrompt,
   isAccessActive,
   normalizeResult,
+  normalizeEingang,
   RESULT_TOOL,
+  EINGANG_TOOL,
+  SYSTEM_PROMPT_EINGANG,
   sha256,
   validateInput,
   verifyStripeSignature,
@@ -46,16 +49,22 @@ async function status(req: Request, context: Context) {
 }
 
 async function translate(req: Request, context: Context) {
-  const input = validateInput(await req.json().catch(() => null));
-  if ("error" in input) return json({ error: input.error }, 400);
+  const r = await runTranslate(await req.json().catch(() => null), req.headers.get("x-sw-token"), context);
+  return json(r.body, r.status);
+}
 
-  const access = await getAccess(req.headers.get("x-sw-token"));
+async function runTranslate(body: any, token: string | null, context: Context): Promise<{ status: number; body: any }> {
+  const input = validateInput(body);
+  if ("error" in input) return { status: 400, body: { error: input.error } };
+
+  const access = await getAccess(token);
   const pro = isAccessActive(access);
   const q = pro ? null : await quota(context);
-  if (q && q.left <= 0) return json({ error: "limit", free: FREE_PER_WEEK }, 402);
+  if (q && q.left <= 0) return { status: 402, body: { error: "limit", free: FREE_PER_WEEK } };
 
   if (!process.env.ANTHROPIC_BASE_URL && !process.env.ANTHROPIC_API_KEY)
-    return json({ error: "KI ist gerade nicht verfügbar." }, 503);
+    return { status: 503, body: { error: "KI ist gerade nicht verfügbar." } };
+  const eingang = input.mode === "eingang";
 
   const client = new Anthropic();
   let result;
@@ -63,27 +72,48 @@ async function translate(req: Request, context: Context) {
     const msg = await client.messages.create({
       model: MODEL,
       max_tokens: 2500,
-      system: SYSTEM_PROMPT,
-      tools: [RESULT_TOOL as any],
+      system: eingang ? SYSTEM_PROMPT_EINGANG : SYSTEM_PROMPT,
+      tools: [(eingang ? EINGANG_TOOL : RESULT_TOOL) as any],
       tool_choice: { type: "tool", name: "antwort" },
       messages: [{ role: "user", content: buildUserPrompt(input) }],
     });
     const block: any = msg.content.find((b: any) => b.type === "tool_use");
     try {
-      result = normalizeResult(block?.input);
+      result = eingang ? normalizeEingang(block?.input) : normalizeResult(block?.input);
       break;
     } catch (e) {
       console.error("parse failed", e, msg.stop_reason, JSON.stringify(block?.input || msg.content).slice(0, 300));
     }
   }
-  if (!result) return json({ error: "Das hat nicht geklappt. Bitte nochmal versuchen." }, 502);
+  if (!result) return { status: 502, body: { error: "Das hat nicht geklappt. Bitte nochmal versuchen." } };
 
   let left: number | null = null;
   if (q && !result.safety) {
     await quotaStore().set(q.key, String(q.used + 1));
     left = q.left - 1;
   }
-  return json({ ...result, pro, left });
+  return { status: 200, body: { ...result, pro, left } };
+}
+
+// Für den iPhone-Kurzbefehl und andere Integrationen: Text rein, beste Version als reiner Text raus.
+async function kurzbefehl(req: Request, url: URL, context: Context) {
+  const raw = await req.text();
+  let body: any;
+  try { body = JSON.parse(raw); } catch { body = { text: raw }; }
+  if (typeof body !== "object" || body === null) body = { text: String(body) };
+  body.mode = body.mode || url.searchParams.get("modus") || "senden";
+  body.recipient = body.recipient || url.searchParams.get("an") || (body.mode === "eingang" ? "ex" : "partner");
+  const token = req.headers.get("x-sw-token") || url.searchParams.get("code");
+  const r = await runTranslate(body, token, context);
+  const text = (t: string, status = 200) =>
+    new Response(t, { status, headers: { "content-type": "text/plain; charset=utf-8", "cache-control": "no-store" } });
+  if (r.status === 402)
+    return text(`Deine 3 Gratis-Übersetzungen diese Woche sind aufgebraucht.\nUnbegrenzt weiter: ${url.origin}/#preise`, 402);
+  if (r.status !== 200) return text(r.body.error || "Das hat nicht geklappt.", r.status);
+  if (r.body.safety) return text(r.body.safety.message);
+  const best = r.body.versions[0].text;
+  const kern = r.body.mode === "eingang" && r.body.kern ? `Worum es eigentlich geht: ${r.body.kern}\n\n` : "";
+  return text(url.searchParams.get("nur") === "text" ? best : `${kern}${best}`);
 }
 
 async function activate(url: URL) {
@@ -129,6 +159,7 @@ export default async (req: Request, context: Context) => {
   try {
     if (route === "translate" && req.method === "POST") return await translate(req, context);
     if (route === "status") return await status(req, context);
+    if (route === "kurzbefehl" && req.method === "POST") return await kurzbefehl(req, url, context);
     if (route === "activate") return await activate(url);
     if (route === "stripe-webhook" && req.method === "POST") return await webhook(req);
     return json({ error: "not_found" }, 404);

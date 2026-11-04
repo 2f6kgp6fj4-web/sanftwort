@@ -1,0 +1,35 @@
+<!doctype html><html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sanftwort am iPhone – Kurzbefehl</title><link rel="stylesheet" href="/legal.css"><link rel="icon" href="/icon.svg"><style>ol li{margin:10px 0}code{background:var(--card);border:1px solid var(--line);padding:2px 6px;border-radius:6px;font-size:14px;word-break:break-all}.tip{background:#e6f5f1;border-radius:12px;padding:12px 14px;color:#1f2430}@media (prefers-color-scheme:dark){.tip{background:#173029;color:#eef0f4}}</style></head><body><main>
+<a class="back" href="/eltern.html">← Sanftwort</a>
+<h1>Sanftwort direkt aus WhatsApp</h1>
+<p>Mit einem iPhone-Kurzbefehl brauchst du die Webseite nicht mehr aufzurufen: <strong>Nachricht markieren → Teilen → Sanftwort</strong>. Die ruhige Antwort liegt danach in deiner Zwischenablage, du fügst sie einfach ein.</p>
+<p class="tip">Einrichtung einmalig, ca. 3 Minuten. Danach geht es in 5 Sekunden.</p>
+
+<h2>1. Kurzbefehl anlegen</h2>
+<ol>
+<li>Öffne die App <strong>Kurzbefehle</strong> → <strong>+</strong> (oben rechts). Nenne ihn <strong>Sanftwort</strong>.</li>
+<li>Tippe unten auf das <strong>(i)</strong> bzw. „Details“ → <strong>Im Share-Sheet anzeigen</strong> einschalten. Bei „Empfängt“ nur <strong>Text</strong> auswählen. Bei „Wenn keine Eingabe“: <strong>Zwischenablage abrufen</strong>.</li>
+<li>Aktion hinzufügen: <strong>Inhalte von URL abrufen</strong>.
+  <ul>
+  <li>URL: <code>https://sanftwort.netlify.app/api/kurzbefehl?modus=eingang&amp;nur=text</code></li>
+  <li>Auf den Pfeil tippen → Methode: <strong>POST</strong></li>
+  <li>Anfragetext: <strong>Datei</strong> → als Datei <strong>Kurzbefehleingabe</strong> wählen</li>
+  <li>Nur wenn du Plus oder einen Pass hast: Header hinzufügen, Schlüssel <code>x-sw-token</code>, Wert = dein Zugangscode (der Teil ab <code>cs_</code> in deinem Zugangslink)</li>
+  </ul></li>
+<li>Aktion hinzufügen: <strong>In Zwischenablage kopieren</strong>.</li>
+<li>Aktion hinzufügen: <strong>Ergebnis anzeigen</strong> (oder „Mitteilung anzeigen“).</li>
+</ol>
+
+<h2>2. Benutzen</h2>
+<ol>
+<li>In WhatsApp die Nachricht lange drücken → <strong>Kopieren</strong>, oder Text markieren → <strong>Teilen</strong> → <strong>Sanftwort</strong>.</li>
+<li>Ohne Teilen-Menü: Kurzbefehl einfach antippen – er nimmt den kopierten Text aus der Zwischenablage.</li>
+<li>Zurück in den Chat, ins Eingabefeld tippen → <strong>Einsetzen</strong>. Lesen, anpassen, senden.</li>
+</ol>
+
+<h2>3. Noch schneller: zweimal hinten aufs iPhone tippen</h2>
+<p><strong>Einstellungen → Bedienungshilfen → Tippen → Auf Rückseite tippen → Doppeltippen → Sanftwort</strong>. Dann reicht: Nachricht kopieren, zweimal hinten aufs iPhone tippen, einfügen.</p>
+
+<h2>Selbst schreiben statt antworten?</h2>
+<p>Leg einen zweiten Kurzbefehl „Sanft schreiben“ an, genauso, nur mit dieser URL: <code>https://sanftwort.netlify.app/api/kurzbefehl?modus=senden&amp;nur=text</code>. Dann tippst du deine wütende Nachricht wie gewohnt, kopierst sie, und bekommst die faire Version zurück.</p>
+<p><small>Datenschutz: Der Text wird nur zum Umformulieren übertragen und nicht gespeichert. Ohne Zugangscode gelten die 3 Gratis-Übersetzungen pro Woche.</small></p>
+</main></body></html>

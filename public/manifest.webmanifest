@@ -1,0 +1,21 @@
+{
+  "name": "Sanftwort",
+  "short_name": "Sanftwort",
+  "description": "Wut rein, faire Worte raus. Und belastende Nachrichten entschärfen.",
+  "start_url": "/?quelle=app",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#faf7f2",
+  "theme_color": "#1f2430",
+  "lang": "de",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ],
+  "share_target": {
+    "action": "/eltern.html",
+    "method": "GET",
+    "params": { "title": "title", "text": "text" }
+  }
+}

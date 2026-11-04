@@ -9,6 +9,8 @@
 <meta property="og:description" content="Meine Nachricht: 88°. Nach Sanftwort: 16°. Probier es mit dem Text, den du fast abgeschickt hättest.">
 <meta name="theme-color" content="#1f2430">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/icon-192.png">
 <style>
 :root{--bg:#faf7f2;--card:#fff;--ink:#1f2430;--muted:#5d6472;--line:#e7e1d8;--hot:#e4572e;--warm:#f2a541;--cool:#2fa58c;--cool-bg:#e6f5f1;--accent:#1f2430;--accent-ink:#fff;--shadow:0 1px 2px rgba(31,36,48,.06),0 8px 24px rgba(31,36,48,.06)}
 @media (prefers-color-scheme:dark){:root{--bg:#14161c;--card:#1d2028;--ink:#eef0f4;--muted:#a3a9b6;--line:#2c303a;--cool-bg:#173029;--accent:#eef0f4;--accent-ink:#14161c;--shadow:none}}
@@ -27,6 +29,8 @@ h1 em{font-style:normal;color:var(--cool)}
 .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:var(--shadow)}
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 .chip{border:1px solid var(--line);background:transparent;color:var(--ink);border-radius:99px;padding:7px 12px;font-size:14px;cursor:pointer}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:12px}.seg button{border:0;background:transparent;color:var(--muted);border-radius:9px;padding:9px 6px;font:inherit;font-size:14px;cursor:pointer}.seg button[aria-pressed=true]{background:var(--card);color:var(--ink);font-weight:600;box-shadow:var(--shadow)}
+.kern{background:var(--bg);border-radius:12px;padding:12px 14px;margin-bottom:12px}.kern b{display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}.kern ul{margin:6px 0 0;padding-left:18px}
 .chip[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 textarea{width:100%;min-height:130px;resize:vertical;border:1px solid var(--line);border-radius:12px;padding:12px;font:inherit;background:var(--bg);color:var(--ink)}
 textarea:focus{outline:2px solid var(--cool);outline-offset:1px}
@@ -86,7 +90,7 @@ dialog::backdrop{background:rgba(10,12,18,.55)}
 .banner code{font-size:12px;word-break:break-all;background:var(--card);padding:2px 6px;border-radius:6px}
 </style>
 </head>
-<body>
+<body data-mode="senden">
 <div class="wrap">
 <header>
   <a class="logo" href="/"><i></i>Sanftwort</a>
@@ -99,6 +103,10 @@ dialog::backdrop{background:rgba(10,12,18,.55)}
 <p class="lead">Schreib rein, was du gerade wirklich denkst – über deinen Partner, deine Ex, die Schwiegermutter. Du bekommst eine Nachricht zurück, die ankommt statt eskaliert.</p>
 
 <div class="card" id="tool">
+  <div class="seg" id="modes" role="group" aria-label="Was möchtest du tun?">
+    <button data-m="senden" aria-pressed="true" type="button">Ich will etwas schreiben</button>
+    <button data-m="eingang" aria-pressed="false" type="button">Ich hab was bekommen</button>
+  </div>
   <div class="chips" id="recipients" role="group" aria-label="An wen?">
     <button class="chip" data-r="partner" aria-pressed="true" type="button">Partner/in</button>
     <button class="chip" data-r="ex" aria-pressed="false" type="button">Ex / Co-Eltern</button>
@@ -183,7 +191,7 @@ const LINKS = {
 const PORTAL = "https://billing.stripe.com/p/login/test_cNi6oI1eF3u4dvbe2Y8N200";
 const $ = (s) => document.querySelector(s);
 const store = { get: (k) => { try { return localStorage.getItem(k) } catch { return null } }, set: (k, v) => { try { localStorage.setItem(k, v) } catch {} } };
-const state = { recipient: "partner", channel: "nachricht", token: store.get("sw_token"), last: null };
+const state = { mode: "senden", recipient: "partner", channel: "nachricht", token: store.get("sw_token"), last: null };
 
 function toast(t) { const el = $("#toast"); el.textContent = t; el.classList.add("on"); setTimeout(() => el.classList.remove("on"), 1800); }
 function esc(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
@@ -214,6 +222,30 @@ function chipGroup(sel, attr, key) {
   });
 }
 chipGroup("#recipients", "r", "recipient");
+const MODES = {
+  senden: { ph: "z. B.: Du hast SCHON WIEDER vergessen, die Kita-Anmeldung abzuschicken. Ich muss mich echt um alles allein kümmern!", btn: "Sanft übersetzen", label: "An wen?" },
+  eingang: { ph: "Füge hier die Nachricht ein, die du bekommen hast – z. B. von deiner Ex oder deinem Ex. Wir filtern die Angriffe raus und schlagen eine ruhige Antwort vor.", btn: "Entschärfen & antworten", label: "Von wem?" },
+};
+function setMode(m) {
+  state.mode = MODES[m] ? m : "senden";
+  $("#modes").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.m === state.mode));
+  $("#text").placeholder = MODES[state.mode].ph;
+  $("#go").textContent = MODES[state.mode].btn;
+  $("#recipients").setAttribute("aria-label", MODES[state.mode].label);
+}
+$("#modes").addEventListener("click", (e) => { const b = e.target.closest("[data-m]"); if (b) setMode(b.dataset.m); });
+function setRecipient(r) {
+  const b = $("#recipients").querySelector(`[data-r="${r}"]`); if (!b) return;
+  $("#recipients").querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-pressed", c === b));
+  state.recipient = r;
+}
+{
+  const q = new URLSearchParams(location.search);
+  setMode(q.get("modus") || document.body.dataset.mode);
+  if (document.body.dataset.recipient) setRecipient(document.body.dataset.recipient);
+  const shared = [q.get("text"), q.get("title")].filter(Boolean).join("\n").trim();
+  if (shared) { $("#text").value = shared.slice(0, 2000); if (!q.get("modus")) setMode("eingang"); setMeter(0); }
+}
 chipGroup("#channels", "c", "channel");
 
 // --- Hitzemeter (Schätzung beim Tippen) ---
@@ -264,14 +296,14 @@ async function translate(morelikeme = false) {
   if (text.length < 3) { $("#text").focus(); toast("Schreib erst, was dich beschäftigt."); return; }
   const btn = $("#go"); btn.disabled = true; btn.textContent = "Kühle runter …";
   try {
-    const res = await api("translate", { method: "POST", body: JSON.stringify({ text, recipient: state.recipient, channel: state.channel, style: $("#style").value, profile: $("#profile").value, morelikeme }) });
+    const res = await api("translate", { method: "POST", body: JSON.stringify({ mode: state.mode, text, recipient: state.recipient, channel: state.channel, style: $("#style").value, profile: $("#profile").value, morelikeme }) });
     const data = await res.json().catch(() => ({}));
     if (res.status === 402) { $("#paywall").showModal(); return; }
     if (!res.ok) { toast(data.error || "Das hat nicht geklappt."); return; }
     state.last = data; render(data);
     refreshStatus();
   } catch { toast("Keine Verbindung. Bitte nochmal versuchen."); }
-  finally { btn.disabled = false; btn.textContent = "Sanft übersetzen"; }
+  finally { btn.disabled = false; btn.textContent = MODES[state.mode].btn; }
 }
 $("#go").addEventListener("click", () => translate(false));
 
@@ -279,6 +311,19 @@ function render(d) {
   const el = $("#result"); el.style.display = "block";
   if (d.safety) {
     el.innerHTML = `<div class="safety">${esc(d.safety.message)}</div>`;
+    el.scrollIntoView({ behavior: "smooth", block: "start" }); return;
+  }
+  if (d.mode === "eingang") {
+    el.innerHTML = `
+    <div class="heat"><span class="from">${d.heat_before}°</span><small>→ deine Antwort</small><span class="to">${d.heat_after}°</span></div>
+    <div class="kern"><b>Worum es eigentlich geht</b>${esc(d.kern)}${d.fragen.length ? `<ul>${d.fragen.map((f) => `<li>${esc(f)}</li>`).join("")}</ul>` : ""}</div>
+    ${d.ignorieren ? `<div class="kern"><b>Musst du nicht beantworten</b>${esc(d.ignorieren)}</div>` : ""}
+    ${!d.antwort_noetig ? `<div class="note"><b>Diese Nachricht braucht eigentlich keine Antwort.</b>Wenn du trotzdem reagieren willst, reicht eine kurze Bestätigung.</div>` : ""}
+    ${d.versions.map((v, i) => `<div class="ver"><h3>${esc(v.label)}</h3><p contenteditable="true" id="v${i}">${esc(v.text)}</p>
+      <div class="row"><button class="btn ghost" data-copy="${i}" type="button">Kopieren</button><button class="btn ghost" data-wa="${i}" type="button">Per WhatsApp</button></div></div>`).join("")}
+    <div class="row" style="margin:4px 0 6px"><button class="btn ghost" id="more" type="button">Klingt nicht nach mir – nochmal</button></div>
+    ${d.tipp ? `<div class="note"><b>Tipp</b>${esc(d.tipp)}</div>` : ""}
+    ${!d.pro && d.left === 0 ? `<div class="note"><b>Das war deine letzte Gratis-Übersetzung diese Woche.</b><a href="#preise">Wochenpass ab 2,99 € – ohne Abo</a></div>` : ""}`;
     el.scrollIntoView({ behavior: "smooth", block: "start" }); return;
   }
   el.innerHTML = `
