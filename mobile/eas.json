@@ -1,5 +1,8 @@
 {
-  "cli": { "version": ">= 16.0.0", "appVersionSource": "remote" },
+  "cli": {
+    "version": ">= 16.0.0",
+    "appVersionSource": "remote"
+  },
   "build": {
     "base": {
       "env": {
@@ -9,16 +12,13 @@
     "preview": {
       "extends": "base",
       "distribution": "internal",
-      "android": { "buildType": "apk" }
+      "android": {
+        "buildType": "apk"
+      }
     },
     "production": {
       "extends": "base",
       "autoIncrement": true
-    }
-  },
-  "submit": {
-    "production": {
-      "ios": { "ascAppId": "SET_AFTER_APP_STORE_CONNECT" }
     }
   }
 }
