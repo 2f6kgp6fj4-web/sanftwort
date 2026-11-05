@@ -22,7 +22,7 @@ jobs:
         run: npx expo prebuild --platform ios --no-install
       - name: Pods installieren
         working-directory: mobile/ios
-        run: pod install
+        run: pod install --repo-update
       - name: Für den Simulator bauen (inkl. Teilen-Erweiterung)
         working-directory: mobile/ios
         run: |
