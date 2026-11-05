@@ -17,6 +17,10 @@ import {
   validateInput,
   verifyStripeSignature,
   weekKey,
+  FREE_APP_PER_WEEK,
+  IP_APP_CAP_PER_WEEK,
+  validInstallId,
+  rcEntitlementActive,
 } from "../../lib/core.mjs";
 
 const MODEL = Netlify.env.get("SW_MODEL") || "claude-haiku-5-5";
@@ -53,14 +57,78 @@ async function translate(req: Request, context: Context) {
   return json(r.body, r.status);
 }
 
-async function runTranslate(body: any, token: string | null, context: Context): Promise<{ status: number; body: any }> {
+type Gate = { pro: boolean; left: number; free: number; commit: () => Promise<void> };
+
+async function webGate(token: string | null, context: Context): Promise<Gate> {
+  const access = await getAccess(token);
+  if (isAccessActive(access)) return { pro: true, left: Infinity, free: FREE_PER_WEEK, commit: async () => {} };
+  const q = await quota(context);
+  return { pro: false, left: q.left, free: FREE_PER_WEEK, commit: () => quotaStore().set(q.key, String(q.used + 1)).then(() => {}) };
+}
+
+// ---------- App ----------
+const rcStore = () => getStore({ name: "rc", consistency: "strong" });
+
+async function rcPro(installId: string, fresh: boolean): Promise<boolean> {
+  const secret = Netlify.env.get("REVENUECAT_SECRET");
+  if (!secret) return false;
+  const store = rcStore();
+  if (!fresh) {
+    const c = (await store.get(installId, { type: "json" })) as any;
+    if (c && Date.now() - c.at < (c.active ? 15 : 2) * 60_000) return !!c.active;
+  }
+  try {
+    const r = await fetch(`https://api.revenuecat.com/v1/subscribers/${encodeURIComponent(installId)}`, {
+      headers: { authorization: `Bearer ${secret}`, accept: "application/json" },
+    });
+    if (!r.ok) { console.error("revenuecat", r.status); return false; }
+    const active = rcEntitlementActive(await r.json(), Netlify.env.get("RC_ENTITLEMENT") || "plus");
+    await store.setJSON(installId, { active, at: Date.now() });
+    return active;
+  } catch (e) {
+    console.error("revenuecat", e);
+    return false;
+  }
+}
+
+async function appGate(req: Request, context: Context): Promise<Gate | Response> {
+  const id = req.headers.get("x-sw-install");
+  if (!validInstallId(id)) return json({ error: "Bitte die App neu starten." }, 400);
+  if (await rcPro(id!, req.headers.get("x-sw-fresh") === "1"))
+    return { pro: true, left: Infinity, free: FREE_APP_PER_WEEK, commit: async () => {} };
+  const wk = weekKey();
+  const key = `app/${wk}/${id}`;
+  const ipKey = `appip/${wk}/${sha256((context.ip || "?") + (Netlify.env.get("TOKEN_SECRET") || "sw"))}`;
+  const store = quotaStore();
+  const used = Number(await store.get(key)) || 0;
+  const ipUsed = Number(await store.get(ipKey)) || 0;
+  const left = Math.max(0, Math.min(FREE_APP_PER_WEEK - used, IP_APP_CAP_PER_WEEK - ipUsed));
+  return {
+    pro: false, left, free: FREE_APP_PER_WEEK,
+    commit: async () => { await store.set(key, String(used + 1)); await store.set(ipKey, String(ipUsed + 1)); },
+  };
+}
+
+async function appStatus(req: Request, context: Context) {
+  const g = await appGate(req, context);
+  if (g instanceof Response) return g;
+  return json({ pro: g.pro, left: g.pro ? null : g.left, free: g.free });
+}
+
+async function appTranslate(req: Request, context: Context) {
+  const g = await appGate(req, context);
+  if (g instanceof Response) return g;
+  const r = await runTranslate(await req.json().catch(() => null), g);
+  return json(r.body, r.status);
+}
+
+async function runTranslate(body: any, gateOrToken: Gate | string | null, context?: Context): Promise<{ status: number; body: any }> {
   const input = validateInput(body);
   if ("error" in input) return { status: 400, body: { error: input.error } };
 
-  const access = await getAccess(token);
-  const pro = isAccessActive(access);
-  const q = pro ? null : await quota(context);
-  if (q && q.left <= 0) return { status: 402, body: { error: "limit", free: FREE_PER_WEEK } };
+  const gate = typeof gateOrToken === "object" && gateOrToken !== null ? gateOrToken : await webGate(gateOrToken, context!);
+  const pro = gate.pro;
+  if (!pro && gate.left <= 0) return { status: 402, body: { error: "limit", free: gate.free } };
 
   if (!process.env.ANTHROPIC_BASE_URL && !process.env.ANTHROPIC_API_KEY)
     return { status: 503, body: { error: "KI ist gerade nicht verfügbar." } };
@@ -87,10 +155,10 @@ async function runTranslate(body: any, token: string | null, context: Context): 
   }
   if (!result) return { status: 502, body: { error: "Das hat nicht geklappt. Bitte nochmal versuchen." } };
 
-  let left: number | null = null;
-  if (q && !result.safety) {
-    await quotaStore().set(q.key, String(q.used + 1));
-    left = q.left - 1;
+  let left: number | null = pro ? null : gate.left;
+  if (!pro && !result.safety) {
+    await gate.commit();
+    left = gate.left - 1;
   }
   return { status: 200, body: { ...result, pro, left } };
 }
@@ -159,6 +227,8 @@ export default async (req: Request, context: Context) => {
   try {
     if (route === "translate" && req.method === "POST") return await translate(req, context);
     if (route === "status") return await status(req, context);
+    if (route === "app/translate" && req.method === "POST") return await appTranslate(req, context);
+    if (route === "app/status") return await appStatus(req, context);
     if (route === "kurzbefehl" && req.method === "POST") return await kurzbefehl(req, url, context);
     if (route === "activate") return await activate(url);
     if (route === "stripe-webhook" && req.method === "POST") return await webhook(req);
@@ -171,5 +241,5 @@ export default async (req: Request, context: Context) => {
 
 export const config: Config = {
   path: "/api/*",
-  rateLimit: { windowLimit: 40, windowSize: 60, aggregateBy: ["ip", "domain"] },
+  rateLimit: { windowLimit: 60, windowSize: 60, aggregateBy: ["ip", "domain"] },
 };

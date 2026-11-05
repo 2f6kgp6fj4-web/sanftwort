@@ -1,0 +1,85 @@
+{
+  "expo": {
+    "name": "Sanftwort",
+    "slug": "sanftwort",
+    "scheme": "sanftwort",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#FAF7F2",
+    "ios": {
+      "bundleIdentifier": "de.sanftwort.app",
+      "buildNumber": "1",
+      "supportsTablet": false,
+      "config": {
+        "usesNonExemptEncryption": false
+      },
+      "infoPlist": {
+        "CFBundleDevelopmentRegion": "de",
+        "CFBundleLocalizations": [
+          "de"
+        ]
+      }
+    },
+    "android": {
+      "package": "de.sanftwort.app",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "backgroundColor": "#FAF7F2",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 120,
+          "backgroundColor": "#FAF7F2",
+          "dark": {
+            "image": "./assets/splash-icon.png",
+            "backgroundColor": "#14161C"
+          }
+        }
+      ],
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Sanftwort nutzt das Mikrofon, damit du einfach sagen kannst, was dich beschäftigt.",
+          "speechRecognitionPermission": "Sanftwort wandelt deine Sprache in Text um, damit du nicht tippen musst.",
+          "androidSpeechServicePackages": [
+            "com.google.android.googlequicksearchbox"
+          ]
+        }
+      ],
+      "./plugins/withShareDisplayName",
+      [
+        "expo-share-intent",
+        {
+          "iosActivationRules": {
+            "NSExtensionActivationSupportsText": true
+          },
+          "iosShareExtensionName": "Sanftwort Share",
+          "androidIntentFilters": [
+            "text/*"
+          ]
+        }
+      ],
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": false
+    },
+    "extra": {
+      "apiUrl": "https://sanftwort.netlify.app",
+      "webUrl": "https://sanftwort.netlify.app",
+      "router": {}
+    }
+  }
+}

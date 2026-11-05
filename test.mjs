@@ -5,6 +5,7 @@ import {
   verifyStripeSignature, accessFromSession, isAccessActive, weekKey,
   validateInput, buildUserPrompt, parseModelJson, SYSTEM_PROMPT,
   normalizeEingang, SYSTEM_PROMPT_EINGANG, EINGANG_TOOL,
+  validInstallId, rcEntitlementActive,
 } from "./lib/core.mjs";
 
 let n = 0;
@@ -73,6 +74,21 @@ t("Eingangs-Modus", () => {
   assert.throws(() => normalizeEingang({ safety: null, versions: [] }));
   assert.match(SYSTEM_PROMPT_EINGANG, /BIFF/); assert.match(SYSTEM_PROMPT_EINGANG, /116 016/);
   assert.equal(EINGANG_TOOL.name, "antwort");
+});
+
+t("App: Install-ID und RevenueCat-Abo", () => {
+  assert.ok(validInstallId("a1b2c3d4e5f6a7b8c9d0"));
+  assert.ok(!validInstallId("kurz"));
+  assert.ok(!validInstallId("../../etc/passwd/xxxxxxxx"));
+  const now = Date.UTC(2026, 10, 5);
+  const sub = (e) => ({ subscriber: { entitlements: e } });
+  assert.ok(rcEntitlementActive(sub({ plus: { expires_date: "2026-12-01T00:00:00Z" } }), "plus", now));
+  assert.ok(!rcEntitlementActive(sub({ plus: { expires_date: "2026-11-01T00:00:00Z" } }), "plus", now));
+  assert.ok(rcEntitlementActive(sub({ plus: { expires_date: "2026-11-01T00:00:00Z", grace_period_expires_date: "2026-11-10T00:00:00Z" } }), "plus", now));
+  assert.ok(rcEntitlementActive(sub({ plus: { expires_date: null } }), "plus", now));
+  assert.ok(!rcEntitlementActive(sub({}), "plus", now));
+  assert.ok(!rcEntitlementActive(null, "plus", now));
+  assert.equal(normalizeEingang({ safety: null, dahinter: "müde", versions: [{ label: "x", text: "y" }] }).dahinter, "müde");
 });
 
 t("Keine Platzhalter mehr in Rechtstexten", () => {

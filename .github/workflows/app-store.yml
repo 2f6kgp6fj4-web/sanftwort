@@ -1,0 +1,36 @@
+name: iPhone-Build für TestFlight / App Store (EAS)
+
+# Startet einen Cloud-Build bei Expo und reicht ihn automatisch bei App Store Connect ein.
+# Voraussetzungen (einmalig): Secret EXPO_TOKEN im Repo, EAS-Projekt verknüpft,
+# iOS-Zertifikate einmal mit "npx eas-cli build -p ios" eingerichtet.
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "Plattform"
+        required: true
+        default: ios
+        type: choice
+        options: [ios, android, all]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: mobile
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+      - run: npm ci --no-audit --no-fund
+      - run: eas build --platform ${{ inputs.platform }} --profile production --non-interactive --no-wait --auto-submit

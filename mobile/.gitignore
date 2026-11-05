@@ -1,0 +1,10 @@
+node_modules
+.expo
+dist-check
+ios
+android
+*.jks
+*.p8
+*.p12
+*.mobileprovision
+.env*.local
