@@ -1,0 +1,15 @@
+name: Server-Test (echte KI)
+on: workflow_dispatch
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          ID=ci$(date +%s)abcdef0123
+          B=https://sanftwort.netlify.app/api/app
+          echo "== status"; curl -s -H "x-sw-install: $ID" $B/status; echo
+          echo "== senden"; curl -s -X POST -H "x-sw-install: $ID" -H 'content-type: application/json' \
+            -d '{"mode":"senden","recipient":"partner","text":"Du hast SCHON WIEDER vergessen den Müll rauszubringen. Immer bleibt alles an mir hängen!"}' $B/translate | jq .
+          echo "== eingang partner"; curl -s -X POST -H "x-sw-install: $ID" -H 'content-type: application/json' \
+            -d '{"mode":"eingang","recipient":"partner","text":"Schön, dass du dich auch mal meldest. Ich hab den ganzen Tag allein mit den Kindern rumgemacht und du sitzt beim Afterwork."}' $B/translate | jq .
+          echo "== status danach"; curl -s -H "x-sw-install: $ID" $B/status; echo
