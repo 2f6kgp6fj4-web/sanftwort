@@ -5,5 +5,5 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          for f in 9_a_d e_9_b; do curl -s https://cdn.cocoapods.org/all_pods_versions_$f.txt | grep -E "^(PurchasesHybridCommon|RevenueCat)/" | tr '/' '\n' | tail -8; echo ---; done
+          for f in 9_a_d e_9_b; do curl -s https://cdn.cocoapods.org/all_pods_versions_$f.txt | grep -E "^(PurchasesHybridCommon|RevenueCat)/" | tr "/" "\n" | grep -E "^[0-9]" | sort -V | tail -6; echo ---; done
           curl -sI https://cdn.cocoapods.org/ | head -5
