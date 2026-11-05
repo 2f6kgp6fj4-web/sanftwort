@@ -2,9 +2,19 @@ name: iPhone-Simulator – App durchklicken und Screenshots
 
 on:
   workflow_dispatch:
+    inputs:
+      app_run_id:
+        description: "Run-ID eines früheren Laufs, dessen App wiederverwendet wird (leer = neu bauen)"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+  actions: read
 
 jobs:
-  screens:
+  build:
+    if: ${{ inputs.app_run_id == '' }}
     runs-on: macos-latest
     timeout-minutes: 75
     defaults:
@@ -22,34 +32,54 @@ jobs:
       - name: Pods
         working-directory: mobile/ios
         run: pod install --repo-update
-      - name: Simulator wählen und starten
-        run: |
-          UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; c=[x for r,l in d.items() if 'iOS' in r for x in l if x['name'].startswith('iPhone')]; p=[x for x in c if 'Pro Max' in x['name']] or c; print(p[-1]['udid'])")
-          echo "UDID=$UDID" >> $GITHUB_ENV
-          xcrun simctl list devices | grep $UDID
-          xcrun simctl boot $UDID
-          xcrun simctl spawn $UDID defaults write .GlobalPreferences AppleLanguages -array de
-          xcrun simctl spawn $UDID defaults write .GlobalPreferences AppleLocale de_DE
-      - name: Bauen (Release, nur dieser Simulator)
+      - name: Bauen (Release, Simulator arm64)
         working-directory: mobile/ios
         run: |
           set -o pipefail
           xcodebuild -workspace Sanftwort.xcworkspace -scheme Sanftwort -configuration Release \
-            -destination "id=$UDID" -derivedDataPath build CODE_SIGNING_ALLOWED=NO COMPILER_INDEX_STORE_ENABLE=NO build | tail -5
-      - name: Installieren
+            -sdk iphonesimulator -arch arm64 -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO COMPILER_INDEX_STORE_ENABLE=NO ONLY_ACTIVE_ARCH=YES build | tail -5
+          cd build/Build/Products/Release-iphonesimulator && zip -qry $GITHUB_WORKSPACE/Sanftwort-sim.zip Sanftwort.app
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sanftwort-sim-app
+          path: Sanftwort-sim.zip
+          retention-days: 30
+
+  screens:
+    needs: build
+    if: ${{ always() && (needs.build.result == 'success' || needs.build.result == 'skipped') }}
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          name: sanftwort-sim-app
+          run-id: ${{ inputs.app_run_id || github.run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Simulator starten und App installieren
         run: |
-          xcrun simctl shutdown $UDID || true
+          unzip -q Sanftwort-sim.zip
+          UDID=$(xcrun simctl list devices available -j | python3 -c "import json,sys; d=json.load(sys.stdin)['devices']; c=[x for r,l in d.items() if 'iOS' in r for x in l if x['name'].startswith('iPhone')]; p=[x for x in c if 'Pro Max' in x['name']] or c; print(p[-1]['udid'])")
+          echo "UDID=$UDID" >> $GITHUB_ENV
           xcrun simctl boot $UDID
+          xcrun simctl spawn $UDID defaults write .GlobalPreferences AppleLanguages -array de
+          xcrun simctl spawn $UDID defaults write .GlobalPreferences AppleLocale de_DE
+          xcrun simctl shutdown $UDID; xcrun simctl boot $UDID
+          xcrun simctl bootstatus $UDID -b
           xcrun simctl status_bar $UDID override --time 9:41 --batteryState charged --batteryLevel 100 --cellularBars 4 --wifiBars 3
-          xcrun simctl install $UDID ios/build/Build/Products/Release-iphonesimulator/Sanftwort.app
+          xcrun simctl install $UDID Sanftwort.app
       - name: Maestro
         run: |
           curl -fsSL "https://get.maestro.mobile.dev" | bash
           export PATH="$PATH:$HOME/.maestro/bin"
-          mkdir -p shots && cd shots
-          maestro --device $UDID test ../.maestro/screens.yaml || (xcrun simctl io $UDID screenshot fehler.png; exit 1)
-      - if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: sanftwort-screens
-          path: mobile/shots
+          mkdir -p $GITHUB_WORKSPACE/shots
+          maestro --device $UDID test -e SHOTS=$GITHUB_WORKSPACE/shots mobile/.maestro/screens.yaml || (xcrun simctl io $UDID screenshot $GITHUB_WORKSPACE/shots/zz-fehler.png; maestro --device $UDID hierarchy > $GITHUB_WORKSPACE/shots/zz-hierarchy.json 2>/dev/null; exit 1)
+      - name: Screenshots in Branch "screenshots" ablegen
+        if: always()
+        run: |
+          cd $RUNNER_TEMP && rm -rf s && mkdir s && cd s && git init -q -b screenshots
+          cp $GITHUB_WORKSPACE/shots/* . 2>/dev/null || true
+          git add -A && git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "Screenshots ${{ github.run_id }}" || exit 0
+          git push -qf "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" HEAD:refs/heads/screenshots
